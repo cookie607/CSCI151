@@ -3,18 +3,60 @@
 #3/1/26
 
 #provides game functions for buying items and encountering random monsters from definitions
+"""
+This program contians interactive game functions, a shop menu, monster summoning, item purchasing and
+a welcome, for a simple text-based adventure game.
+
+It includes functions to:
+    - Display a welcome message for the player
+    - Show a shop menu with 2 items and prices
+    - Allow the player to purchase items and track remaining money
+    - summon a random monster with stats and a description
+
+Dependencies:
+    -Python standard library: random
+
+Usage:
+    Import the functions and call them as part of the game flow:
+        i.e. from game_module import print_welcome, print_shop_menu
+        i.e. from game_module import purchase_item, random_monster
+
+    Calls:
+        print_welcome("Player", 50)
+        print_shop_menu("Potion", 5, "Sword", 20)
+        purchase_item()
+        random_monster()        
+"""
 
 import random
 
 #--------------------------------------------------------------------------------------------#
 def print_welcome(name, width):
-    """Function welcomes the user with a specialized welcome from the parameters of a name
-    and the desired width of the centered welcome phrase"""
+    """
+    Prints a centered welcome message for the player. 
+
+    Parameters:
+        name (str): The player's name.
+        width (int): The total width for centering the message.
+
+    Returns:
+        str: the formatted welcome message centered within the width. 
+    """
     return f"{'Hello, ' + name + '!':^{width}}"    
 
 def print_shop_menu(item1, price1, item2, price2):
-    """Calling the function opens the shop displaying 2 items with prices from the inputs of
-    the first item with its price and the second item with its price respectively"""
+    """
+    Displays a shop menu with two items and thier prices.
+
+    Parameters:
+        item1 (str): Name of the first item.
+        price1 (float): Price of the first item.
+        item2 (str): Name of the second item.
+        price2 (float): Price of the second item.
+
+    Prints:
+        A formatted shop menu with items and prices. 
+    """
     item1 = item1.capitalize()
     item2 = item2.capitalize()
     price1 = f"${price1:.2f}"
@@ -27,9 +69,21 @@ def print_shop_menu(item1, price1, item2, price2):
     
 
 def purchase_item():
-    """This function opens an opportunity for the player to purchase an item by specifying the
-     item's price, how much money they have and how many they would like to purchase and returns
-     how many they have purchased with how much remaining money they have"""
+    """
+    Allows the player to purchase items and tracks money spent.
+
+    Prompts the user for:
+        -Item price
+        -Starting money
+        -Quantity to purchase (default of 1)
+
+    Prints:
+        -Number of items purchase
+        -Remaining money
+
+    Returns:
+        None
+    """
 
     itemPrice = int(input("Enter item price: ")) #recieves user input about the item price followed by how much money they have then how many items they wish to buy
     startingMoney = int(input("Enter starting money: "))
@@ -51,8 +105,23 @@ def purchase_item():
     print(f"Money remaining: {leftover_money}")
 
 def random_monster():
-    """A random monster gets summoned by random with random aspects to challenge the user.
-    The monsters have random stats and a description is provided for each"""
+    """
+    Summons a random monster with stats and a description.
+
+    Parameters:
+        None. The monster's type, health, power, and money are randomly determined.
+        Prints details to the screen.
+
+    Returns:
+        dict: A dictionary with keys:
+            - name (str): Monster's name
+            - description (str): Monster description
+            - health (int): Monster health points
+            - power (int): Monster attack power
+            - money (int): Money the monster carries 
+    """
+
+
     my_monster = {} #empty dictionary to be assigned with monster information
     chance = random.randint(1,3)
 
@@ -103,3 +172,27 @@ def random_monster():
     print(f"Money: {my_monster['money']}")
 
     return my_monster
+
+
+def test_functions():
+    """Runs basic tests for all functions in this module."""
+
+    print("Testing print_welcome:")
+    print(print_welcome("Preston", 30))
+    print()
+
+    print("Testing print_shop_menu:")
+    print_shop_menu("potion", 5, "sword", 20)
+    print()
+
+    print("Testing purchase_item:")
+    purchase_item()
+    print()
+
+    print("Testing random_monster:")
+    monster = random_monster()
+    print("Returned dictionary:", monster)
+
+
+if __name__ == "__main__":
+    test_functions()
