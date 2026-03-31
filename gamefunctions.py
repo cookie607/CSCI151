@@ -122,60 +122,138 @@ def random_monster():
     """
 
 
-    my_monster = {} #empty dictionary to be assigned with monster information
-    chance = random.randint(1,3)
+def random_monster():
+    monsters = [
+        {
+            "name": "Goblin",
+            "description": "A small, scrawny creature...",
+            "health": (6,9),
+            "power": (2,4),
+            "money": (3,4)
+        },
+        {
+            "name": "Slime",
+            "description": "A wobbling blob...",
+            "health": (5,7),
+            "power": (1,2),
+            "money": (1,2)
+        },
+        {
+            "name": "Angry Chicken",
+            "description": "A scrappy bird...",
+            "health": (2,4),
+            "power": (1,2),
+            "money": (0,2)
+        }
+    ]
 
-    if chance == 1:
-        my_monster["name"] = "Goblin" # assigns the first possible monstser as a goblin
-        my_monster["description"] = (
-            "A small, "
-            "scrawny creature with dull "
-            "green skin and a rusty dagger. "
-            "It’s quick but fragile, relying on "
-            "sneak attacks and fleeing when threatened."
-            )
-        my_monster["health"] = random.randint(5,7)
-        my_monster["power"] = random.randint(2,4)
-        my_monster["money"] = random.randint(3,6)
+    base = random.choice(monsters)
 
-    elif chance == 2:
-        my_monster["name"] = "Slime" # assigns the second monster as a slime
-        my_monster["description"] = (
-            "A small, "
-            "wobbling blob of translucent "
-            "goo. It moves slowly and deals "
-            "little damage, making it more of "
-            "a minor obstacle than a real threat."
-            )
-        my_monster["health"] = random.randint(2,3)
-        my_monster["power"] = random.randint(0,1)
-        my_monster["money"] = random.randint(0,2)
+    my_monster = {
+        "name": base["name"],
+        "description": base["description"],
+        "health": random.randint(*base["health"]),
+        "power": random.randint(*base["power"]),
+        "money": random.randint(*base["money"])
+    }
 
-    elif chance == 3:
-        my_monster["name"] = "Angry Chicken" # monster three is an angry chicken
-        my_monster["description"] = (
-            "A small, "
-            "scrappy bird with sharp claws "
-            "and a fierce glare. It pecks and "
-            "scratches quickly but is fragile "
-            "and easily frightened. "
-            )
-        my_monster["health"] = random.randint(2,4)
-        my_monster["power"] = random.randint(1,2)
-        my_monster["money"] = 0
-
-    print("\nAn enemy approaches! \n    ----------")
-    print(f"{my_monster['name']}")
-    print(f"{my_monster['description']}")
+    print("\nAn enemy approaches!\n----------")
+    print(my_monster["name"])
+    print(my_monster["description"])
     print(f"Health: {my_monster['health']}")
     print(f"Power: {my_monster['power']}")
     print(f"Money: {my_monster['money']}")
 
     return my_monster
 
+def fight(player_info, monster_info):
+    """
+    Handles turn-based combat between player and monster.
+    """
 
-def test_functions():
-    """Runs basic tests for all functions in this module."""
+    # Local copies for combat
+    player_health = player_info["health"]
+    monster_health = monster_info["health"]
+    player_damage = player_info["power"]
+    monster_damage = monster_info["power"]
+
+    print(f"\n You engage the {monster_info['name']} in battle!")
+
+    while player_health > 0 and monster_health > 0:
+        user_action = input("\nChoose action: (1) Fight (2) Run: ").strip()
+
+        if user_action == "1":
+            # Player attacks first
+            monster_health -= player_damage
+            print(f"\nYou hit the {monster_info['name']} for {player_damage} damage!")
+
+            # Check if monster is defeated before it attacks
+            if monster_health <= 0:
+                print(f"The {monster_info['name']} has been defeated!")
+                break
+
+            # Monster attacks back
+            player_health -= monster_damage
+            print(f"The {monster_info['name']} hits you for {monster_damage} damage!")
+
+            # Display updated health
+            print(f"Your health: {player_health}")
+            print(f"{monster_info['name']} health: {monster_health}")
+
+        elif user_action == "2":
+            print("You ran away!")
+            player_info["health"] = player_health
+            return player_info
+
+        else:
+            print("Invalid command. Choose 1 or 2.")
+
+    # --- After combat ends ---
+    if player_health <= 0:
+        print("\n You have been defeated...")
+        
+    elif monster_health <= 0:
+        print(f"\n You defeated the {monster_info['name']}!")
+        print(f"You found {monster_info['money']} gold!")
+        player_info["money"] += monster_info["money"]
+
+    # Save updated health back to player
+    player_info["health"] = max(player_health, 0)
+
+    return player_info
+
+def rest(player_info):
+    """Allows the player to rest for 5 gold and recover 5 health points, up to max health."""
+
+    print(f"Your current health: {player_info['health']}, Gold: {player_info['money']}")
+    choice = input("Would you like to rest for the price of 5 gold? (yes or no) ").strip().lower()
+
+    if choice == "yes":
+
+        if player_info["money"] < 5:                #Checks if the player has enough money
+            print("You don't have enough gold to rest!")
+            return
+
+        if player_info["health"] >= player_info.get("max_health", 20):  #checks if player has full health
+            print("Your health is already full!")
+
+        else:                                       #heals the player and collects payment
+            player_info["health"] += 5
+            if player_info["health"] > player_info.get("max_health", 20):
+                player_info["health"] = player_info.get("max_health", 20)
+            player_info["money"] -= 5
+            print(f"You take a rest. Health: {player_info['health']}, Gold: {player_info['money']}")
+
+    elif choice == "no":                            #leaves the resting area
+        print("You chose not to rest.")
+
+    else:                                           #the input is invalid prompts new input
+        print("Invalid input, please enter 'yes' or 'no'.")
+
+
+
+"""def test_functions():
+    Runs basic tests for all functions in this module.
 
     print("Testing print_welcome:")
     print(print_welcome("Preston", 30))
@@ -196,3 +274,5 @@ def test_functions():
 
 if __name__ == "__main__":
     test_functions()
+
+"""
