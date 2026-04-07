@@ -29,7 +29,10 @@ Usage:
 """
 
 import random
-
+items =[
+    {"name": "Rusty Dagger", "type": "weapon", "damage": 1, "durability": 10, "price": 10},
+    {"name": "Blowrup-o-nator", "type": "weapon", "damage": 1000000, "durability": 1, "price": 100}
+    ]
 #--------------------------------------------------------------------------------------------#
 def print_welcome(name, width):
     """
@@ -167,36 +170,54 @@ def random_monster():
     return my_monster
 
 def fight(player_info, monster_info):
-    """
-    Handles turn-based combat between player and monster.
-    """
 
-    # Local copies for combat
     player_health = player_info["health"]
     monster_health = monster_info["health"]
-    player_damage = player_info["power"]
     monster_damage = monster_info["power"]
 
-    print(f"\n You engage the {monster_info['name']} in battle!")
+    print(f"\nYou engage the {monster_info['name']} in battle!")
+
+    if player_info.get("equipped_weapon"):
+        print(f"You are wielding {player_info['equipped_weapon']['name']}.")
 
     while player_health > 0 and monster_health > 0:
         user_action = input("\nChoose action: (1) Fight (2) Run: ").strip()
 
         if user_action == "1":
-            # Player attacks first
+            player_damage = player_info["power"]
+
+            # Player attacks
             monster_health -= player_damage
             print(f"\nYou hit the {monster_info['name']} for {player_damage} damage!")
 
-            # Check if monster is defeated before it attacks
+            # --- DURABILITY LOGIC ---
+            weapon = player_info.get("equipped_weapon")
+            if weapon:
+                weapon["durability"] -= 1
+                print(f"{weapon['name']} durability: {weapon['durability']}")
+
+                if weapon["durability"] <= 0:
+                    print(f"Your {weapon['name']} broke!")
+
+                    # Remove from inventory
+                    if weapon in player_info["inventory"]:
+                        player_info["inventory"].remove(weapon)
+
+                    player_info["equipped_weapon"] = None
+
+                    # Reset power
+                    base_power = player_info.get("base_power", 4)
+                    player_info["power"] = base_power
+
+            # Check if monster dies
             if monster_health <= 0:
                 print(f"The {monster_info['name']} has been defeated!")
                 break
 
-            # Monster attacks back
+            # Monster attacks
             player_health -= monster_damage
             print(f"The {monster_info['name']} hits you for {monster_damage} damage!")
 
-            # Display updated health
             print(f"Your health: {player_health}")
             print(f"{monster_info['name']} health: {monster_health}")
 
@@ -206,18 +227,17 @@ def fight(player_info, monster_info):
             return player_info
 
         else:
-            print("Invalid command. Choose 1 or 2.")
+            print("Invalid command.")
 
-    # --- After combat ends ---
+    # After combat
     if player_health <= 0:
-        print("\n You have been defeated...")
-        
+        print("\nYou have been defeated...")
+
     elif monster_health <= 0:
-        print(f"\n You defeated the {monster_info['name']}!")
+        print(f"\nYou defeated the {monster_info['name']}!")
         print(f"You found {monster_info['money']} gold!")
         player_info["money"] += monster_info["money"]
 
-    # Save updated health back to player
     player_info["health"] = max(player_health, 0)
 
     return player_info
@@ -250,7 +270,96 @@ def rest(player_info):
     else:                                           #the input is invalid prompts new input
         print("Invalid input, please enter 'yes' or 'no'.")
 
+def shop(player_info):
+    print("You enter a dusty shop...")
 
+    weapons = [item for item in items if item["type"] == "weapon"]
+
+    while True:
+        print("\nItems for sale:")
+        for weapon in weapons:
+            print(f"- {weapon['name']} (${weapon['price']}) [DMG: {weapon['damage']}, DUR: {weapon['durability']}]")
+
+        purchase = input("\nEnter item name or 'exit': ").strip().lower()
+
+        if purchase == "exit":
+            print("You leave the shop.")
+            break
+
+        found = False
+
+        for weapon in weapons:
+            if purchase == weapon["name"].lower():
+                found = True
+
+                if player_info["money"] >= weapon["price"]:
+                    player_info["money"] -= weapon["price"]
+
+                    # IMPORTANT: copy item so durability is unique per purchase
+                    new_weapon = weapon.copy()
+
+                    player_info.setdefault("inventory", []).append(new_weapon)
+
+                    print(f"You bought {weapon['name']}!")
+                else:
+                    print("Not enough gold.")
+                break
+
+        if not found:
+            print("Item not found.")
+
+    return player_info
+
+            
+def equip(player_info):
+    inventory = player_info.get("inventory", [])
+
+    if not inventory:
+        print("You have no items to equip.")
+        return player_info
+
+    print("\nYour inventory:")
+    equipped = player_info.get("equipped_weapon")
+
+    for i, item in enumerate(inventory):
+        marker = " (equipped)" if item == equipped else ""
+        durability = item.get("durability", "N/A")
+        print(f"{i + 1}) {item['name']} (DMG: {item.get('damage', 0)}, DUR: {durability}){marker}")
+
+    choice = input("\nChoose item number to equip (or 'exit'): ").strip().lower()
+
+    if choice == "exit":
+        return player_info
+
+    if not choice.isdigit():
+        print("Invalid input.")
+        return player_info
+
+    index = int(choice) - 1
+
+    if index < 0 or index >= len(inventory):
+        print("Invalid choice.")
+        return player_info
+
+    selected = inventory[index]
+
+    # Prevent equipping broken weapons
+    if selected.get("durability", 0) <= 0:
+        print("That weapon is broken.")
+        return player_info
+
+    if selected.get("type") == "weapon":
+        player_info["equipped_weapon"] = selected
+
+        base_power = player_info.get("base_power", 4)
+        player_info["power"] = base_power + selected.get("damage", 0)
+
+        print(f"You equipped {selected['name']}!")
+        print(f"Power: {player_info['power']}")
+    else:
+        print("You can't equip that item.")
+
+    return player_info
 
 """def test_functions():
     Runs basic tests for all functions in this module.
