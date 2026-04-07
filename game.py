@@ -8,7 +8,9 @@ from gamefunctions import (
     purchase_item,
     random_monster,
     fight,
-    rest
+    rest,
+    shop,
+    equip
     )
 
 def main():
@@ -20,9 +22,12 @@ def main():
     print()
 
     player_info = {
-        "health": 20,
-        "power": 4,
-        "money": 30
+    "health": 20,
+    "base_power": 4,
+    "power": 4,
+    "money": 30,
+    "inventory": [],
+    "equipped_weapon": None
     }
 
     quest = True
@@ -31,8 +36,10 @@ def main():
         choice = input(                                # player game options
             " \n1) Adventure into the woods."
             " \n2) Rest."
-            " \n3) Abandon run.\n"
-            "Input: [choose 1,2 or 3]"
+            " \n3) Visit the Shop."
+            " \n4) Equip Item."
+            " \n5) Abandon run.\n"
+            "Input: [choose 1-5] \n"
             ).lower().strip()
 
         if choice == "1":
@@ -47,7 +54,14 @@ def main():
             
             rest(player_info)
         
-        elif choice == "3":                         #quits the game
+        elif choice == "3":
+
+            player_info = shop(player_info)
+
+        elif choice == "4":
+            player_info = equip(player_info)
+
+        elif choice == "5":                     # Quits the game
             print(f"You did well {name}!")
             print("You have abandoned the run.")
             quest = False
