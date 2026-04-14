@@ -29,6 +29,7 @@ Usage:
 """
 
 import random
+import json
 items =[
     {"name": "Rusty Dagger", "type": "weapon", "damage": 1, "durability": 10, "price": 10},
     {"name": "Blowrup-o-nator", "type": "weapon", "damage": 1000000, "durability": 1, "price": 100}
@@ -106,23 +107,6 @@ def purchase_item():
 
     print(f"Number of items purchased: {num_purchased}")
     print(f"Money remaining: {leftover_money}")
-
-def random_monster():
-    """
-    Summons a random monster with stats and a description.
-
-    Parameters:
-        None. The monster's type, health, power, and money are randomly determined.
-        Prints details to the screen.
-
-    Returns:
-        dict: A dictionary with keys:
-            - name (str): Monster's name
-            - description (str): Monster description
-            - health (int): Monster health points
-            - power (int): Monster attack power
-            - money (int): Money the monster carries 
-    """
 
 
 def random_monster():
@@ -361,6 +345,25 @@ def equip(player_info):
 
     return player_info
 
+def save(filename, player_info):
+    # the function saves the data of the player including the health, gold, and inventory
+    with open(filename, "w") as file:
+        json.dump(player_info, file)
+
+    print(f"Game saved to {filename}")
+
+def load_game(filename):
+    # loads the player data from a previous save given a user input if the user provides the filename of the previous run
+    
+    try:
+        with open(filename, "r") as file:
+            player_info = json.load(file)
+
+        print(f"Game loaded from {filename}")
+        return player_info
+    except FileNotFoundError:
+        print("Save file not found. Starting new game.")
+        return None
 """def test_functions():
     Runs basic tests for all functions in this module.
 
