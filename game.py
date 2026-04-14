@@ -10,25 +10,48 @@ from gamefunctions import (
     fight,
     rest,
     shop,
-    equip
+    equip,
+    save,
+    load_game
     )
 
 def main():
     """Runs the main flow of the game."""
 
-    # Welcome the player
-    name = input("Enter your name: ")
-    print(print_welcome(name, 50))
-    print()
+    choice = input(
+        "Welcome!\n"
+        "1) New Game\n"
+        "2) Load Game\n"
+        "Choice: "
+        ).strip()
+    if choice == "2":
+        filename = input("Enter save file name: ")
+        player_info = load_game(filename)
 
-    player_info = {
-    "health": 20,
-    "base_power": 4,
-    "power": 4,
-    "money": 30,
-    "inventory": [],
-    "equipped_weapon": None
-    }
+        if player_info is None:
+            player_info = {
+                "health": 20,
+                "base_power": 4,
+                "power": 4,
+                "money": 30,
+                "inventory": [],
+                "equipped_weapon": None
+            }
+
+    else: 
+         # Welcome the player
+        name = input("Enter your name: ")
+        print(print_welcome(name, 50))
+        print()
+
+        player_info = {
+            "health": 20,
+            "base_power": 4,
+            "power": 4,
+            "money": 30,
+            "inventory": [],
+            "equipped_weapon": None
+        }
 
     quest = True
 
@@ -38,7 +61,7 @@ def main():
             " \n2) Rest."
             " \n3) Visit the Shop."
             " \n4) Equip Item."
-            " \n5) Abandon run.\n"
+            " \n5) Save and Quit.\n"
             "Input: [choose 1-5] \n"
             ).lower().strip()
 
@@ -62,8 +85,10 @@ def main():
             player_info = equip(player_info)
 
         elif choice == "5":                     # Quits the game
-            print(f"You did well {name}!")
-            print("You have abandoned the run.")
+            filename = input("Enter save file name: ")
+            save(filename, player_info)
+
+            print("Game saved. Goodbye!")
             quest = False
 
         else:                                       #the input is invalid prompts new input
