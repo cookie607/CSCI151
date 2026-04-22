@@ -1,4 +1,4 @@
-# gamefunctions2.py
+# gamefunctions.py
 #Preston Fields
 #3/1/26
 
@@ -30,10 +30,22 @@ Usage:
 
 import random
 import json
+import pygame
+
 items =[
     {"name": "Rusty Dagger", "type": "weapon", "damage": 1, "durability": 10, "price": 10},
     {"name": "Blowrup-o-nator", "type": "weapon", "damage": 1000000, "durability": 1, "price": 100}
     ]
+
+GRID_SIZE = 10
+TILE_SIZE = 32
+
+town_position = (5, 5)
+monster_position = (8, 2)
+
+def reset_monster_position():
+    return (random.randint(0, 9), random.randint(0, 9))
+
 #--------------------------------------------------------------------------------------------#
 def print_welcome(name, width):
     """
@@ -364,6 +376,14 @@ def load_game(filename):
     except FileNotFoundError:
         print("Save file not found. Starting new game.")
         return None
+
+def check_tile_event(player_pos, town_pos, monster_pos):
+    if player_pos == town_pos:
+        return "TOWN"
+    if player_pos == monster_pos:
+        return "MONSTER"
+    return None
+
 """def test_functions():
     Runs basic tests for all functions in this module.
 
